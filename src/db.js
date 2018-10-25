@@ -9,16 +9,16 @@ mongoose.connect(
 // 连接成功
 mongoose.connection.on('connected', function () {
     console.log(
-        'Mongoose connection open to ' + 'mongodb://localhost:27017/test'
+        'Mongoose successfully connected!'
     );
 });
 
 // 连接失败
 mongoose.connection.on('error', function (err) {
-    console.log('Mongoose connection error: ' + err);
+    console.log('Mongoose connection failed ' + err);
 });
 
 // 断开连接
 mongoose.connection.on('disconnected', function () {
-    console.log('Mongoose connection disconnected');
+    console.log('Mongoose successfully disconnected');
 });
