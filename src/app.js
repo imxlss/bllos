@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const koaBody = require('koa-body');
 const bodyParser = require('koa-bodyparser');
 const md5 = require('md5');
+const session = require('koa-session');
 
 const db = require('./db');
 
@@ -101,16 +102,15 @@ const signin = async ctx => {
         msg: '用户名或密码错误'
     }
     // ctx.session.user = data;
-
     const id = data._id;
-    const keep_user = 1000 * 60 * 10;
+    const max_age = 1000 * 60 * 10;
 
     ctx.cookies.set('userid', id, {
-        maxAge: keep_user,
+        maxAge: max_age,
         httpOnly: false
     });
     ctx.cookies.set('username', username, {
-        maxAge: keep_user,
+        maxAge: max_age,
         httpOnly: false
     });
 
@@ -135,9 +135,13 @@ const signout = async ctx => {
     }
 }
 
-app.use(koaBody());
-// app.use(bodyParser());
+// app.use(session(app));
 
+app.use(koaBody());
+app.use(bodyParser());
+
+
+// cors 解决跨域
 router.all('/api/*', async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', 'http://localhost:4200');
     ctx.set('Access-Control-Allow-Credentials', 'true');
@@ -150,7 +154,7 @@ router
     .get('/api/signout', signout)
 
 app.use(router.routes()).use(router.allowedMethods());
-app.use(bodyParser());
+
 
 app.listen(3000, () => {
     console.log('listening to port 3000...')
