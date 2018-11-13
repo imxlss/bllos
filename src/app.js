@@ -32,8 +32,44 @@ const UserSchema = new Schema({
 }, {
     timestamps: true
 });
+/* 
+const ArticleSchema = new Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    content: {
+        type: String,
+        required: true
+    },
+    text_link: {
+        type: String
+    },
+    tags: [{
+        type: String
+    }],
+    summary: {
+        type: String
+    },
+    // comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
+    review: {
+        type: Number,
+        default: 0
+    },
+    isOriginal: {
+        type: Boolean,
+        required: true
+    }
+}, {
+    timestamps: true
+}); */
 
 const UserModel = mongoose.model('User', UserSchema);
+// const ArticleModel = mongoose.model('Article', ArticleSchema);
 
 // 注册
 const register = async ctx => {
@@ -43,21 +79,23 @@ const register = async ctx => {
         password,
         createdAt,
         updateAt
-    } = JSON.parse(ctx.request.body);
+    } = JSON.parse(
+        ctx.request.body
+    );
     if (!username || !password) {
         console.log('用户名或密码不存在！');
-        return ctx.body = {
+        return (ctx.body = {
             msg: 'error'
-        };
+        });
     }
     const isExist = await UserModel.findOne({
         username
     });
     if (isExist) {
-        return ctx.body = {
+        return (ctx.body = {
             status: 'fail',
             msg: '账号已存在'
-        };
+        });
     }
     const result = await UserModel.create({
         username,
@@ -67,18 +105,18 @@ const register = async ctx => {
     });
     if (!result) {
         console.log('注册失败');
-        return ctx.body = {
+        return (ctx.body = {
             status: 'fail',
             msg: '注册失败'
-        };
+        });
     } else {
         console.log('注册成功');
-        return ctx.body = {
+        return (ctx.body = {
             status: 'success',
             msg: '注册成功'
-        };
+        });
     }
-}
+};
 // 登录
 const signin = async ctx => {
     const {
@@ -86,10 +124,10 @@ const signin = async ctx => {
         password
     } = JSON.parse(ctx.request.body);
     if (!username || !password) {
-        return ctx.body = {
+        return (ctx.body = {
             status: 'fail',
             msg: '请输入账号和密码'
-        }
+        });
     }
     const data = await UserModel.findOne({
         username,
@@ -97,10 +135,11 @@ const signin = async ctx => {
     }, {
         password: 0
     });
-    if (!data) return ctx.body = {
-        status: 'fail',
-        msg: '用户名或密码错误'
-    }
+    if (!data)
+        return (ctx.body = {
+            status: 'fail',
+            msg: '用户名或密码错误'
+        });
     // ctx.session.user = data;
     const id = data._id;
     const max_age = 1000 * 60 * 10;
@@ -114,36 +153,39 @@ const signin = async ctx => {
         httpOnly: false
     });
 
-    ctx.body = ({
+    ctx.body = {
         msg: '登录成功',
         data
-    });
-}
+    };
+};
 // 退出
 const signout = async ctx => {
     console.log(ctx.cookies.get('userid'));
 
     ctx.cookies.set('userid', null, {
         maxAge: 0
-    })
+    });
     ctx.cookies.set('username', null, {
         maxAge: 0
-    })
-    return ctx.body = {
+    });
+    return (ctx.body = {
         status: 'success',
         msg: '退出成功'
-    }
-}
+    });
+};
+
+/* const createArticle = async ctx => {
+    
+} */
 
 // app.use(session(app));
 
 app.use(koaBody());
 app.use(bodyParser());
 
-
 // cors 解决跨域
 router.all('/api/*', async (ctx, next) => {
-    ctx.set('Access-Control-Allow-Origin', 'http://localhost:4200');
+    ctx.set('Access-Control-Allow-Origin', 'http://www.xlss.link');
     ctx.set('Access-Control-Allow-Credentials', 'true');
     await next();
 });
@@ -151,12 +193,11 @@ router.all('/api/*', async (ctx, next) => {
 router
     .post('/api/register', register)
     .post('/api/signin', signin)
-    .get('/api/signout', signout)
+    .get('/api/signout', signout);
 
 app.use(router.routes()).use(router.allowedMethods());
 
-
-app.listen(3000, () => {
-    console.log('listening to port 3000...')
+app.listen(8080, () => {
+    console.log('listening to port 8080...');
 });
 // 引入并使用koa-bodyparser中间件 然后就可以直接在ctx.request.body 中获取到JSON格式的POST数据了。
