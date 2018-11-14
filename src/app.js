@@ -7,11 +7,18 @@ const koaBody = require('koa-body');
 const bodyParser = require('koa-bodyparser');
 const md5 = require('md5');
 const session = require('koa-session');
-
 const db = require('./db');
-
 const Schema = mongoose.Schema;
 
+app.keys = ['bllo:secret'];
+const CONFIG = {
+    key: 'bllo',
+    maxAge: 1000 * 60 * 5, // 有效期
+    overwrite: true,
+    signed: true,
+};
+
+/* -----------------model------------------ */
 const UserSchema = new Schema({
     username: {
         type: String,
@@ -32,7 +39,7 @@ const UserSchema = new Schema({
 }, {
     timestamps: true
 });
-/* 
+
 const ArticleSchema = new Schema({
     title: {
         type: String,
@@ -49,7 +56,7 @@ const ArticleSchema = new Schema({
     text_link: {
         type: String
     },
-    tags: [{
+    tag: [{
         type: String
     }],
     summary: {
@@ -66,11 +73,13 @@ const ArticleSchema = new Schema({
     }
 }, {
     timestamps: true
-}); */
+});
 
 const UserModel = mongoose.model('User', UserSchema);
-// const ArticleModel = mongoose.model('Article', ArticleSchema);
+const ArticleModel = mongoose.model('Article', ArticleSchema);
 
+
+/* -----------------router------------------ */
 // 注册
 const register = async ctx => {
     // ctx.request.body 是一个json字符串
@@ -140,7 +149,9 @@ const signin = async ctx => {
             status: 'fail',
             msg: '用户名或密码错误'
         });
-    // ctx.session.user = data;
+    ctx.session.user = data;
+    console.log('-----------------');
+    console.log(ctx.session);
     const id = data._id;
     const max_age = 1000 * 60 * 10;
 
@@ -162,6 +173,7 @@ const signin = async ctx => {
 const signout = async ctx => {
     console.log(ctx.cookies.get('userid'));
 
+    ctx.session.user = null;
     ctx.cookies.set('userid', null, {
         maxAge: 0
     });
@@ -174,18 +186,36 @@ const signout = async ctx => {
     });
 };
 
-/* const createArticle = async ctx => {
-    
-} */
+const createArticle = async ctx => {
+    const user = ctx.session.user;
 
-// app.use(session(app));
+    if (!user) return (ctx.body = {
+        status: 'fail',
+        msg: '请先进行登陆'
+    });
+
+    const {
+        name,
+        _id
+    } = user;
+    const data = JSON.parse(ctx.request.body);
+
+    if (!data) return (ctx.body = {
+        status: 'fail',
+        msg: '数据发送失败'
+    });
+}
+
+/* -----------------一些中间件------------------ */
+app.use(session(CONFIG, app));
 
 app.use(koaBody());
 app.use(bodyParser());
 
 // cors 解决跨域
 router.all('/api/*', async (ctx, next) => {
-    ctx.set('Access-Control-Allow-Origin', 'http://www.xlss.link');
+    // ctx.set('Access-Control-Allow-Origin', 'http://www.xlss.link');
+    ctx.set('Access-Control-Allow-Origin', 'http://localhost:8000');
     ctx.set('Access-Control-Allow-Credentials', 'true');
     await next();
 });
