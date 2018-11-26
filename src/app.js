@@ -19,69 +19,61 @@ const CONFIG = {
 };
 
 /* -----------------model------------------ */
-const UserSchema = new Schema(
-  {
-    username: {
-      type: String,
-      required: true
-    },
-    password: {
-      type: String,
-      required: true
-    }
-    /*     createdAt: {
-            type: Date,
-            default: Date.now
-        },
-        updateAt: {
-            type: Date,
-            default: Date.now
-        } */
+const UserSchema = new Schema({
+  username: {
+    type: String,
+    required: true
   },
-  {
-    timestamps: true
+  password: {
+    type: String,
+    required: true
   }
-);
+  /*     createdAt: {
+          type: Date,
+          default: Date.now
+      },
+      updateAt: {
+          type: Date,
+          default: Date.now
+      } */
+}, {
+  timestamps: true
+});
 
-const ArticleSchema = new Schema(
-  {
-    title: {
-      type: String,
-      required: true
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    content: {
-      type: String,
-      required: true
-    },
-    text_link: {
-      type: String
-    },
-    tag: [
-      {
-        type: String
-      }
-    ],
-    summary: {
-      type: String
-    },
-    // comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
-    review: {
-      type: Number,
-      default: 0
-    },
-    isOriginal: {
-      type: Boolean,
-      required: true
-    }
+const ArticleSchema = new Schema({
+  title: {
+    type: String,
+    required: true
   },
-  {
-    timestamps: true
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  text_link: {
+    type: String
+  },
+  tag: [{
+    type: String
+  }],
+  summary: {
+    type: String
+  },
+  // comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
+  review: {
+    type: Number,
+    default: 0
+  },
+  isOriginal: {
+    type: Boolean,
+    required: true
   }
-);
+}, {
+  timestamps: true
+});
 
 const UserModel = mongoose.model('User', UserSchema);
 const ArticleModel = mongoose.model('Article', ArticleSchema);
@@ -90,7 +82,12 @@ const ArticleModel = mongoose.model('Article', ArticleSchema);
 // 注册
 const register = async ctx => {
   // ctx.request.body 是一个json字符串
-  const { username, password, createdAt, updateAt } = JSON.parse(
+  const {
+    username,
+    password,
+    createdAt,
+    updateAt
+  } = JSON.parse(
     ctx.request.body
   );
   if (!username || !password) {
@@ -131,22 +128,22 @@ const register = async ctx => {
 };
 // 登录
 const signin = async ctx => {
-  const { username, password } = JSON.parse(ctx.request.body);
+  const {
+    username,
+    password
+  } = JSON.parse(ctx.request.body);
   if (!username || !password) {
     return (ctx.body = {
       status: 'fail',
       msg: '请输入账号和密码'
     });
   }
-  const data = await UserModel.findOne(
-    {
-      username,
-      password: md5(password)
-    },
-    {
-      password: 0
-    }
-  );
+  const data = await UserModel.findOne({
+    username,
+    password: md5(password)
+  }, {
+    password: 0
+  });
   if (!data)
     return (ctx.body = {
       status: 'fail',
@@ -198,9 +195,11 @@ const createArticle = async ctx => {
       msg: '请先进行登陆'
     });
 
-  const { _id } = user;
+  const {
+    _id
+  } = user;
   const data = JSON.parse(ctx.request.body);
-//   console.log(data);
+  //   console.log(data);
   if (!data)
     return (ctx.body = {
       status: 'fail',
@@ -231,38 +230,55 @@ const createArticle = async ctx => {
 };
 
 const getArticleList = async ctx => {
-  let { page, pagesize } = ctx.query;
+  let {
+    page,
+    pagesize
+  } = ctx.query;
   if (!page) page = 1;
   if (!pagesize) pagesize = 10;
   const skip = (Number(page) - 1) * Number(pagesize);
   const total = await ArticleModel.count();
 
-  const articleList = await ArticleModel.find()
+  const articleList = await ArticleModel.find(null, {
+      content: 0,
+      _v: 0,
+      author: 0
+    })
     .skip(Number(skip))
     .limit(Number(pagesize));
 
   return (ctx.body = {
     status: 'success',
-    data: { total, articleList }
+    data: {
+      total,
+      articleList
+    }
   });
 };
 
 const getArticleDetail = async ctx => {
-  const { id } = ctx.query;
+  const {
+    id
+  } = ctx.query;
+  console.log(id);
 
-  const data = await ArticleModel.findById(id).populate('author', {
-    password: 0
-  });
+  /*   const data = await ArticleModel.findById(id).populate('author', {
+      password: 0
+    }); */
+  const data = await ArticleModel.findById(id);
+  console.log(data);
   if (!data)
     return (ctx.body = {
       status: 'fail',
       msg: '获取失败'
     });
 
-  const review = data.review + 1;
-  const updateview = await ArticleModel.findByIdAndUpdate(data.id, {
-    $set: { review }
-  }); // $set 用来指明更新的字段
+  /*   const review = data.review + 1;
+    const updateview = await ArticleModel.findByIdAndUpdate(data.id, {
+      $set: {
+        review
+      }
+    });  */ // $set 用来指明更新的字段
 
   return (ctx.body = {
     status: 'success',
@@ -272,7 +288,6 @@ const getArticleDetail = async ctx => {
 
 /* -----------------一些中间件------------------ */
 app.use(session(CONFIG, app));
-
 app.use(koaBody());
 app.use(bodyParser());
 
@@ -290,7 +305,8 @@ router
   .get('/api/signout', signout)
 
   .post('/api/create', createArticle)
-  .get('/api/articleList', getArticleList);
+  .get('/api/articleList', getArticleList)
+  .get('/api/articleDetail', getArticleDetail);
 
 app.use(router.routes()).use(router.allowedMethods());
 
