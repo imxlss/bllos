@@ -1,22 +1,22 @@
 const md5 = require('md5');
-const UserModel = require('./models/user.model');
+const UserModel = require('../models/user.model');
 
 class UserController {
   static async checkConnect(ctx) {
-    console.log(ctx.request.body);
+    return ctx.body = ctx.request.body;
   }
 
   // 注册
   static async register(ctx) {
-    // ctx.request.body 是一个json字符串
-    const { username, password } = JSON.parse(ctx.request.body);
-    console.log(username, password);
-    return;
+    // ctx.request.body 是一个json对象
+    const { username, password } = ctx.request.body;
+
     if (!username || !password) {
       console.log('用户名或密码不存在！');
       // return ctx.error({ msg: 'errorerror' });
       return (ctx.body = {
-        msg: 'error'
+        status: 'fail',
+        msg: '用户名或密码不存在！'
       });
     }
     const isExist = await UserModel.findOne({
@@ -30,9 +30,7 @@ class UserController {
     }
     const result = await UserModel.create({
       username,
-      password: md5(password),
-      createdAt,
-      updateAt
+      password: md5(password)
     });
     if (!result) {
       console.log('注册失败');
@@ -51,7 +49,8 @@ class UserController {
 
   // 登录
   static async signin(ctx) {
-    const { username, password } = JSON.parse(ctx.request.body);
+    const { username, password } = ctx.request.body;
+
     if (!username || !password) {
       return (ctx.body = {
         status: 'fail',
@@ -73,7 +72,6 @@ class UserController {
         msg: '用户名或密码错误'
       });
     ctx.session.user = data;
-    console.log('-----------------');
     console.log(ctx.session);
     const id = data._id;
     const max_age = 1000 * 60 * 10;

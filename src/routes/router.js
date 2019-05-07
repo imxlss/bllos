@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 const router = new Router();
-const UserController = require('./user');
-const articleController = require('./article');
+const UserController = require('../controllers/user');
+const articleController = require('../controllers/article');
 
 // cors 解决跨域
 // ctx.set('Access-Control-Allow-Origin', 'http://www.xxxx.com');

@@ -1,4 +1,4 @@
-const ArticleModel = require('./models/article.model');
+const ArticleModel = require('../models/article.model');
 
 class ArticleController {
   static async createArticle(ctx) {

@@ -3,8 +3,8 @@ const app = new Koa();
 const koaBody = require('koa-body');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
-const db = require('./db');
-const router = require('./router');
+const db = require('./models/db');
+const router = require('./routes/router');
 
 app.keys = ['bllo:secret'];
 const CONFIG = {
@@ -14,9 +14,9 @@ const CONFIG = {
   signed: true
 };
 
-/* -----------------一些中间件------------------ */
+/* 一些中间件 */
 app.use(session(CONFIG, app));
-app.use(koaBody());
+// app.use(koaBody());
 app.use(bodyParser());
 
 app.use(router.routes()).use(router.allowedMethods());
