@@ -4,7 +4,7 @@ const koaBody = require('koa-body');
 const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 const db = require('./models/db');
-const router = require('./routes/router');
+const router = require('./routers/router');
 
 app.keys = ['bllo:secret'];
 const CONFIG = {

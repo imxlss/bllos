@@ -3,7 +3,7 @@ const UserModel = require('../models/user.model');
 
 class UserController {
   static async checkConnect(ctx) {
-    return ctx.body = ctx.request.body;
+    return (ctx.body = ctx.request.body);
   }
 
   // 注册
