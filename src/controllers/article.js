@@ -7,7 +7,7 @@ class ArticleController {
     if (!user)
       return (ctx.body = {
         status: 'fail',
-        msg: '请先进行登陆'
+        msg: '请先进行登录'
       });
 
     const { _id } = user;

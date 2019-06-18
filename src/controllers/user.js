@@ -9,16 +9,28 @@ class UserController {
   // 注册
   static async register(ctx) {
     // ctx.request.body 是一个json对象
-    const { username, password } = ctx.request.body;
+    const {
+      username,
+      password,
+      apassword
+    } = ctx.request.body;
 
     if (!username || !password) {
       console.log('用户名或密码不存在！');
       // return ctx.error({ msg: 'errorerror' });
       return (ctx.body = {
         status: 'fail',
-        msg: '用户名或密码不存在！'
+        msg: '请输入用户名和密码！'
       });
     }
+
+    if (password !== apassword) {
+      return ctx.body = {
+        status: 'fail',
+        msg: '两次输入的密码不一致！'
+      }
+    }
+
     const isExist = await UserModel.findOne({
       username
     });
@@ -33,23 +45,23 @@ class UserController {
       password: md5(password)
     });
     if (!result) {
-      console.log('注册失败');
       return (ctx.body = {
         status: 'fail',
         msg: '注册失败'
       });
-    } else {
-      console.log('注册成功');
-      return (ctx.body = {
-        status: 'success',
-        msg: '注册成功'
-      });
     }
+    return (ctx.body = {
+      status: 'success',
+      msg: '注册成功'
+    });
   }
 
   // 登录
   static async signin(ctx) {
-    const { username, password } = ctx.request.body;
+    const {
+      username,
+      password
+    } = ctx.request.body;
 
     if (!username || !password) {
       return (ctx.body = {
@@ -57,15 +69,12 @@ class UserController {
         msg: '请输入账号和密码'
       });
     }
-    const data = await UserModel.findOne(
-      {
-        username,
-        password: md5(password)
-      },
-      {
-        password: 0
-      }
-    );
+    const data = await UserModel.findOne({
+      username,
+      password: md5(password)
+    }, {
+      password: 0
+    });
     if (!data)
       return (ctx.body = {
         status: 'fail',
@@ -86,6 +95,7 @@ class UserController {
     });
 
     ctx.body = {
+      status: 'success',
       msg: '登录成功',
       data
     };
