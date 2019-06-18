@@ -1,7 +1,8 @@
 const Router = require('koa-router');
 const router = new Router();
 const UserController = require('../controllers/user');
-const articleController = require('../controllers/article');
+const ArticleController = require('../controllers/article');
+const AdminController = require('../controllers/admin');
 
 // cors 解决跨域
 // ctx.set('Access-Control-Allow-Origin', 'http://www.xxxx.com');
@@ -17,8 +18,10 @@ router
   .get('/api/signout', UserController.signout)
   .post('/api/check', UserController.checkConnect)
 
-  .post('/api/create', articleController.createArticle)
-  .get('/api/articleList', articleController.getArticleList)
-  .get('/api/articleDetail', articleController.getArticleDetail);
+  .post('/api/create', ArticleController.createArticle)
+  .get('/api/articleList', ArticleController.getArticleList)
+  .get('/api/articleDetail', ArticleController.getArticleDetail)
+
+  .post('api/create_admin', AdminController.createAdmin)
 
 module.exports = router;
