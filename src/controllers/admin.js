@@ -3,7 +3,10 @@ const AdminModel = require('../models/admin.model');
 
 class AdminController {
   static async createAdmin(ctx) {
-    const { username, password } = ctx.request.body;
+    const {
+      username,
+      password
+    } = ctx.request.body;
 
     if (!username || !password) {
       return (ctx.body = {
@@ -12,7 +15,9 @@ class AdminController {
       });
     }
 
-    const isExist = AdminModel.findOne({ username });
+    const isExist = AdminModel.findOne({
+      username
+    });
 
     if (isExist) {
       return (ctx.body = {
@@ -40,7 +45,10 @@ class AdminController {
   }
 
   static async signin(ctx) {
-    const { username, password } = ctx.request.body;
+    const {
+      username,
+      password
+    } = ctx.request.body;
     if (!username || !password) {
       return (ctx.body = {
         status: 'fail',
@@ -48,15 +56,12 @@ class AdminController {
       });
     }
 
-    const data = AdminModel.findOne(
-      {
-        username,
-        password: md5(password)
-      },
-      {
-        password: 0
-      }
-    );
+    const data = AdminModel.findOne({
+      username,
+      password: md5(password)
+    }, {
+      password: 0
+    });
 
     if (!data) {
       return (ctx.body = {
@@ -84,6 +89,14 @@ class AdminController {
       msg: '登陆成功',
       data
     };
+  }
+
+  static async siginout(ctx) {
+    ctx.session.user = null;
+    return ctx.body = {
+      status: 'success',
+      msg: '已退出'
+    }
   }
 }
 
