@@ -6,6 +6,12 @@ const session = require('koa-session');
 const db = require('./models/db');
 const router = require('./routers/router');
 
+/* const axios = require('axios');
+
+axios.get('xxx_url').then(res => {
+  console.log(res);
+}); */
+
 app.keys = ['bllo:secret'];
 const CONFIG = {
   key: 'bllo',
@@ -25,3 +31,4 @@ app.listen(8080, () => {
   console.log('listening to port 8080...');
 });
 // 引入并使用koa-bodyparser中间件 然后就可以直接在ctx.request.body 中获取到JSON格式的POST数据了。
+
